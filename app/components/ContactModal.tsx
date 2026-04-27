@@ -7,10 +7,10 @@ import { X } from "lucide-react";
 type FormFields = {
   name: string;
   email: string;
-  phone: number | "";
+  phone: string;
   company: string;
   domain: string;
-  candidates: number | "";
+  candidates: string;
   mode: string;
   location: string;
 };
@@ -41,75 +41,65 @@ export default function ContactModal({
 
   if (!isOpen) return null;
 
+  const validateField = (name: string, value: string) => {
+    let error = "";
+
+    if (name === "name") {
+      if (!value.trim()) error = "Required";
+      else if (!/^[A-Za-z\s]+$/.test(value)) error = "Only letters";
+    }
+
+    if (name === "email") {
+      if (!value.trim()) error = "Required";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+        error = "Invalid email";
+    }
+
+    if (name === "phone") {
+      if (!value) error = "Required";
+      else if (!/^\d{10}$/.test(value)) error = "10 digits only";
+    }
+
+    if (name === "company" && !value.trim()) error = "Required";
+    if (name === "domain" && !value) error = "Required";
+    if (name === "mode" && !value) error = "Required";
+
+    if (name === "candidates") {
+      if (!value) error = "Required";
+      else if (Number(value) <= 0) error = "Invalid";
+    }
+
+    if (name === "location" && !value.trim()) error = "Required";
+
+    setErrors((prev) => ({ ...prev, [name]: error }));
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
 
-    if (name === "phone" || name === "candidates") {
-      setForm((prev) => ({
-        ...prev,
-        [name]: value === "" ? "" : Number(value),
-      }));
-    } else {
-      setForm((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+    setForm((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value);
   };
 
-  const validate = () => {
+  const validateAll = () => {
+    let valid = true;
     const newErrors: Partial<Record<keyof FormFields, string>> = {};
 
-    if (!form.name.trim()) {
-      newErrors.name = "Name is required";
-    } else if (!/^[A-Za-z\s]+$/.test(form.name)) {
-      newErrors.name = "Only letters allowed";
-    }
-
-    if (!form.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      newErrors.email = "Invalid email";
-    }
-
-    if (form.phone === "") {
-      newErrors.phone = "Phone required";
-    } else if (!/^\d{10}$/.test(String(form.phone))) {
-      newErrors.phone = "Must be 10 digits";
-    }
-
-    if (!form.company.trim()) {
-      newErrors.company = "Company required";
-    }
-
-    if (!form.domain) {
-      newErrors.domain = "Select domain";
-    }
-
-    if (form.candidates === "") {
-      newErrors.candidates = "Required";
-    } else if (form.candidates <= 0) {
-      newErrors.candidates = "Must be greater than 0";
-    }
-
-    if (!form.mode) {
-      newErrors.mode = "Select mode";
-    }
-
-    if (!form.location.trim()) {
-      newErrors.location = "Location required";
-    }
+    Object.entries(form).forEach(([key, value]) => {
+      validateField(key, value);
+      if (!value) valid = false;
+    });
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return valid;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) return;
+    if (!validateAll()) return;
 
     setShowAlert(true);
 
@@ -132,89 +122,67 @@ export default function ContactModal({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl w-full max-w-5xl grid md:grid-cols-2 overflow-hidden relative">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+        <div className="relative w-full max-w-6xl rounded-2xl overflow-hidden shadow-2xl bg-white grid md:grid-cols-2">
+
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-500 hover:text-black"
+            className="absolute top-4 right-4 z-20 bg-white/80 backdrop-blur p-2 rounded-full hover:scale-110 transition"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
 
           <div className="hidden md:block relative">
             <Image
-              src="/logos/business-v2.webp"
-              alt="form"
+              src="/logos/hero.png"
+              alt="image"
               fill
               className="object-cover"
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-8 space-y-4">
-            <h2 className="text-2xl font-semibold text-gray-900">
+          <form
+            onSubmit={handleSubmit}
+            className="p-10 space-y-6 bg-white"
+          >
+            <h2 className="text-3xl font-semibold text-gray-900">
               Enquire Now
             </h2>
 
-            <div>
-              <input
-                name="name"
-                placeholder="Enter Name"
-                value={form.name}
-                onChange={handleChange}
-                className="w-full border-b border-gray-300 py-2 text-gray-900 placeholder-gray-400 bg-transparent outline-none focus:border-blue-600"
-              />
-              {errors.name && (
-                <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-              )}
-            </div>
-
-            <div>
-              <input
-                name="email"
-                placeholder="Enter Email"
-                value={form.email}
-                onChange={handleChange}
-                className="w-full border-b border-gray-300 py-2 text-gray-900 placeholder-gray-400 bg-transparent outline-none focus:border-blue-600"
-              />
-              {errors.email && (
-                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-              )}
-            </div>
-
-            <div>
-              <input
-                name="phone"
-                placeholder="Enter Phone Number"
-                value={form.phone}
-                onChange={handleChange}
-                className="w-full border-b border-gray-300 py-2 text-gray-900 placeholder-gray-400 bg-transparent outline-none focus:border-blue-600"
-              />
-              {errors.phone && (
-                <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
-              )}
-            </div>
-
-            <div>
-              <input
-                name="company"
-                placeholder="Enter Company Name"
-                value={form.company}
-                onChange={handleChange}
-                className="w-full border-b border-gray-300 py-2 text-gray-900 placeholder-gray-400 bg-transparent outline-none focus:border-blue-600"
-              />
-              {errors.company && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.company}
-                </p>
-              )}
-            </div>
+            {[
+              { name: "name", type: "text", label: "Name" },
+              { name: "email", type: "email", label: "Email" },
+              { name: "phone", type: "number", label: "Phone" },
+              { name: "company", type: "text", label: "Company" },
+              { name: "location", type: "text", label: "Location" },
+            ].map((field) => (
+              <div key={field.name} className="relative">
+                <input
+                  type={field.type}
+                  name={field.name}
+                  value={form[field.name as keyof FormFields]}
+                  onChange={handleChange}
+                  className="peer w-full border-b-2 border-gray-300 bg-transparent py-2 text-gray-900 placeholder-transparent focus:outline-none focus:border-blue-600"
+                  placeholder={field.label}
+                />
+                <label className="absolute left-0 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-gray-400 peer-focus:-top-3 peer-focus:text-xs peer-focus:text-blue-600">
+                  {field.label}
+                </label>
+                {errors[field.name as keyof FormFields] && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors[field.name as keyof FormFields]}
+                  </p>
+                )}
+              </div>
+            ))}
 
             <div>
               <select
                 name="domain"
                 value={form.domain}
                 onChange={handleChange}
-                className="w-full border-b border-gray-300 py-2 text-gray-900 bg-transparent outline-none focus:border-blue-600"
+                className="w-full border-b-2 py-2 text-gray-900 bg-transparent focus:outline-none focus:border-blue-600"
               >
                 <option value="">Select Domain</option>
                 <option>IT</option>
@@ -222,22 +190,21 @@ export default function ContactModal({
                 <option>Healthcare</option>
               </select>
               {errors.domain && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.domain}
-                </p>
+                <p className="text-xs text-red-500">{errors.domain}</p>
               )}
             </div>
 
             <div>
               <input
+                type="number"
                 name="candidates"
-                placeholder="Enter No. of candidates"
+                placeholder="Candidates"
                 value={form.candidates}
                 onChange={handleChange}
-                className="w-full border-b border-gray-300 py-2 text-gray-900 placeholder-gray-400 bg-transparent outline-none focus:border-blue-600"
+                className="w-full border-b-2 py-2 text-gray-900 bg-transparent focus:outline-none focus:border-blue-600"
               />
               {errors.candidates && (
-                <p className="text-red-500 text-xs mt-1">
+                <p className="text-xs text-red-500">
                   {errors.candidates}
                 </p>
               )}
@@ -248,37 +215,20 @@ export default function ContactModal({
                 name="mode"
                 value={form.mode}
                 onChange={handleChange}
-                className="w-full border-b border-gray-300 py-2 text-gray-900 bg-transparent outline-none focus:border-blue-600"
+                className="w-full border-b-2 py-2 text-gray-900 bg-transparent focus:outline-none focus:border-blue-600"
               >
-                <option value="">Select Mode</option>
+                <option value="">Delivery Mode</option>
                 <option>Online</option>
                 <option>Offline</option>
               </select>
               {errors.mode && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.mode}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <input
-                name="location"
-                placeholder="Enter Location"
-                value={form.location}
-                onChange={handleChange}
-                className="w-full border-b border-gray-300 py-2 text-gray-900 placeholder-gray-400 bg-transparent outline-none focus:border-blue-600"
-              />
-              {errors.location && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.location}
-                </p>
+                <p className="text-xs text-red-500">{errors.mode}</p>
               )}
             </div>
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg mt-4 hover:bg-blue-700 transition"
+              className="w-full mt-4 py-3 rounded-lg text-white font-medium bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 transition shadow-lg hover:shadow-xl"
             >
               Submit
             </button>
@@ -287,15 +237,14 @@ export default function ContactModal({
       </div>
 
       {showAlert && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 overflow-hidden">
-          <p>Thank you! Form submitted</p>
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-xl overflow-hidden">
+          <p className="font-medium">Thank you! Submitted successfully</p>
           <div className="absolute bottom-0 left-0 h-1 bg-white animate-progress"></div>
         </div>
       )}
 
       <style jsx>{`
         .animate-progress {
-          width: 100%;
           animation: progress 3s linear forwards;
         }
         @keyframes progress {

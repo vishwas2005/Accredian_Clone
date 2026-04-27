@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 
@@ -38,6 +38,13 @@ export default function ContactModal({
   >({});
 
   const [showAlert, setShowAlert] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -83,10 +90,12 @@ export default function ContactModal({
 
   const validateAll = () => {
     let valid = true;
+
     Object.entries(form).forEach(([key, value]) => {
       validateField(key, value);
       if (!value) valid = false;
     });
+
     return valid;
   };
 
@@ -108,31 +117,30 @@ export default function ContactModal({
 
   return (
     <>
-      {/* MODAL */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-        <div className="relative w-full max-w-4xl bg-white rounded-xl shadow-xl overflow-hidden grid md:grid-cols-2">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="relative w-full max-w-3xl bg-white rounded-xl shadow-xl overflow-hidden grid md:grid-cols-2 max-h-[85vh]">
 
-          {/* CLOSE */}
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 z-50 bg-white p-2 rounded-full shadow hover:scale-110 transition"
+            className="absolute top-3 right-3 z-50 bg-white p-2 rounded-full shadow hover:scale-110 transition text-gray-700"
           >
             <X size={18} />
           </button>
 
-          {/* IMAGE */}
-          <div className="hidden md:block relative h-[400px]">
+          <div className="hidden md:block relative min-h-[350px]">
             <Image
-              src="/logos/hero.png"
+              src="/logos/business-v2.webp"
               alt="img"
               fill
               className="object-cover"
             />
           </div>
 
-          {/* FORM */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            <h2 className="text-2xl font-semibold text-gray-900">
+          <form
+            onSubmit={handleSubmit}
+            className="overflow-y-auto p-5 space-y-2"
+          >
+            <h2 className="text-xl font-semibold text-gray-900">
               Enquire Now
             </h2>
 
@@ -144,7 +152,7 @@ export default function ContactModal({
               onChange={handleChange}
               className={inputClass}
             />
-            <p className="text-xs text-red-500 h-3">{errors.name}</p>
+            <p className="text-xs text-red-500 h-4">{errors.name}</p>
 
             <input
               type="email"
@@ -154,17 +162,17 @@ export default function ContactModal({
               onChange={handleChange}
               className={inputClass}
             />
-            <p className="text-xs text-red-500 h-3">{errors.email}</p>
+            <p className="text-xs text-red-500 h-4">{errors.email}</p>
 
             <input
-              type="number"
+              type="tel"
               name="phone"
               placeholder="Phone"
               value={form.phone}
               onChange={handleChange}
               className={inputClass}
             />
-            <p className="text-xs text-red-500 h-3">{errors.phone}</p>
+            <p className="text-xs text-red-500 h-4">{errors.phone}</p>
 
             <input
               type="text"
@@ -174,7 +182,7 @@ export default function ContactModal({
               onChange={handleChange}
               className={inputClass}
             />
-            <p className="text-xs text-red-500 h-3">{errors.company}</p>
+            <p className="text-xs text-red-500 h-4">{errors.company}</p>
 
             <input
               type="text"
@@ -184,7 +192,7 @@ export default function ContactModal({
               onChange={handleChange}
               className={inputClass}
             />
-            <p className="text-xs text-red-500 h-3">{errors.location}</p>
+            <p className="text-xs text-red-500 h-4">{errors.location}</p>
 
             <select
               name="domain"
@@ -196,7 +204,7 @@ export default function ContactModal({
               <option>IT</option>
               <option>Finance</option>
             </select>
-            <p className="text-xs text-red-500 h-3">{errors.domain}</p>
+            <p className="text-xs text-red-500 h-4">{errors.domain}</p>
 
             <input
               type="number"
@@ -206,7 +214,7 @@ export default function ContactModal({
               onChange={handleChange}
               className={inputClass}
             />
-            <p className="text-xs text-red-500 h-3">{errors.candidates}</p>
+            <p className="text-xs text-red-500 h-4">{errors.candidates}</p>
 
             <select
               name="mode"
@@ -218,7 +226,7 @@ export default function ContactModal({
               <option>Online</option>
               <option>Offline</option>
             </select>
-            <p className="text-xs text-red-500 h-3">{errors.mode}</p>
+            <p className="text-xs text-red-500 h-4">{errors.mode}</p>
 
             <button
               type="submit"
@@ -230,17 +238,15 @@ export default function ContactModal({
         </div>
       </div>
 
-      {/* ALERT */}
       {showAlert && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[320px] bg-green-600 text-white px-4 py-3 rounded-md shadow-lg overflow-hidden">
-          <p className="text-sm">Thank you! Form submitted successfully.</p>
-
-          {/* PROGRESS BAR */}
+        <div className="fixed z-[100] top-6 right-6 w-[320px] bg-green-600 text-white px-4 py-3 rounded-md shadow-lg overflow-hidden">
+          <p className="text-sm">
+            Thank you! Form submitted successfully.
+          </p>
           <div className="absolute bottom-0 left-0 h-[3px] bg-white animate-progress"></div>
         </div>
       )}
 
-      {/* ANIMATION */}
       <style jsx>{`
         .animate-progress {
           animation: progress 3s linear forwards;

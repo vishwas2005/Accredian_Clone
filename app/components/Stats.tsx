@@ -7,7 +7,7 @@ export default function Stats() {
       text: "Professionals Trained For Exceptional Career Success",
     },
     {
-      value: "200+",
+      value: "300+",
       text: "Sessions Delivered With Unmatched Learning Excellence",
     },
     {

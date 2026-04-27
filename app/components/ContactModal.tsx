@@ -118,7 +118,7 @@ export default function ContactModal({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-        <div className="relative w-full max-w-3xl bg-white rounded-xl shadow-xl overflow-hidden grid md:grid-cols-2 max-h-[85vh]">
+        <div className="relative w-full max-w-3xl bg-white rounded-xl shadow-xl grid md:grid-cols-2 max-h-[90vh]">
 
           <button
             onClick={onClose}
@@ -138,7 +138,7 @@ export default function ContactModal({
 
           <form
             onSubmit={handleSubmit}
-            className="overflow-y-auto p-5 space-y-2"
+            className="overflow-y-auto p-5 space-y-2 pb-6"
           >
             <h2 className="text-xl font-semibold text-gray-900">
               Enquire Now
@@ -228,12 +228,14 @@ export default function ContactModal({
             </select>
             <p className="text-xs text-red-500 h-4">{errors.mode}</p>
 
-            <button
-              type="submit"
-              className="w-full mt-2 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-            >
-              Submit
-            </button>
+            <div className="sticky bottom-0 bg-white pt-3">
+              <button
+                type="submit"
+                className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+              >
+                Submit
+              </button>
+            </div>
           </form>
         </div>
       </div>
